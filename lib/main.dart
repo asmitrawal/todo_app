@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:todo_app/dashboard/ui/dashboard_screen.dart';
+import 'package:todo_app/login/ui/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
         //   bodyMedium: GoogleFonts.indieFlower(),
         // )
       ),
-      home: DashboardScreen(),
+      home: LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
