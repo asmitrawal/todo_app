@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:page_transition/page_transition.dart';
+import 'package:todo_app/dashboard/ui/dashboard_screen.dart';
+import 'package:todo_app/login/cubit/google_sign_in_cubit.dart';
 
 class LoginWidget extends StatelessWidget {
   const LoginWidget({super.key});
@@ -48,7 +52,16 @@ class LoginWidget extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      PageTransition(
+                        child: DashboardScreen(),
+                        type: PageTransitionType.leftToRight,
+                        duration: Duration(milliseconds: 300),
+                      ),
+                    );
+                    context.read<GoogleSignInCubit>().googleSignIn(); 
+                  },
                   child: Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
