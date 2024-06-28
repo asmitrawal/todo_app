@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:todo_app/common/common_state.dart';
-import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
-import 'package:todo_app/dashboard/cubit/fetch_todos_cubit.dart';
-import 'package:todo_app/dashboard/model/todo.dart';
-import 'package:todo_app/login/ui/login_screen.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:loader_overlay/loader_overlay.dart';
+import 'package:todo_app/common/common_state.dart';
+import 'package:todo_app/common/custom_dialog.dart';
+import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
+import 'package:todo_app/dashboard/cubit/delete_todo_cubit.dart';
+import 'package:todo_app/dashboard/cubit/fetch_todos_cubit.dart';
+import 'package:todo_app/dashboard/cubit/update_todo_cubit.dart';
+import 'package:todo_app/dashboard/model/todo.dart';
+import 'package:todo_app/dashboard/ui/custom_app_bar.dart';
+import 'package:todo_app/dashboard/ui/upper_section.dart';
 
 class DashboardWidget extends StatefulWidget {
   const DashboardWidget({super.key});
@@ -17,215 +20,203 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
-  IconData _mode = Icons.dark_mode_outlined;
-
   @override
   void initState() {
     super.initState();
-
-    context.read<FetchTodosCubit>().fetchTodos();
   }
 
   @override
   Widget build(BuildContext context) {
+    String? todoText;
+
+    //update module is moved here because the onPressed cannot handle async function
+    _updateTodoHandler({required List<Todo> todo, required int index}) async {
+      todoText = await showDialog(
+        context: context,
+        builder: (context) {
+          return CustomDialog(
+            taskAtHand: "Update your",
+          );
+        },
+      );
+      if (todoText != null) {
+        print(todoText);
+        context
+            .read<UpdateTodoCubit>()
+            .updateTodo(docId: todo[index].docId, title: todoText);
+      }
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(60),
-          child: Icon(FontAwesomeIcons.user),
-        ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                setState(() {
-                  if (_mode == Icons.dark_mode_outlined) {
-                    _mode = Icons.dark_mode;
-                  } else {
-                    _mode = Icons.dark_mode_outlined;
-                  }
-                });
-              },
-              icon: Icon(_mode)),
-          IconButton(
-              onPressed: () {
-                Navigator.of(context).push(PageTransition(
-                  child: LoginScreen(),
-                  type: PageTransitionType.rightToLeft,
-                  duration: Duration(milliseconds: 300),
-                ));
-              },
-              icon: Icon(Icons.logout)),
-        ],
-        elevation: 0,
-        scrolledUnderElevation: 0,
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            color: Colors.white,
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Text(
-              "What's up, Aayush!",
-              style: TextStyle(
-                fontSize: 20,
-              ),
-            ),
-          ),
-          Container(
-            color: Colors.white,
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Text(
-              "CATEGORIES",
-              style: TextStyle(
-                fontSize: 12,
-              ),
-            ),
-          ),
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: 4,
-                  child: Container(
-                    height: 80,
-                    color: Colors.white,
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "40 tasks",
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          "Due Tasks",
-                          style: TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Flexible(
-                  flex: 6,
-                  fit: FlexFit.tight,
-                  child: Container(
-                    color: Colors.white,
-                    padding: EdgeInsets.all(5),
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "18 tasks",
-                          style: TextStyle(
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          "Completed Tasks",
-                          style: TextStyle(
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            color: Colors.white,
-            padding: EdgeInsets.all(5),
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-            child: Text(
-              "Today's Tasks",
-              style: TextStyle(
-                fontSize: 14,
-              ),
-            ),
-          ),
-          BlocBuilder<FetchTodosCubit, CommonState>(
-            builder: (context, state) {
-              if (state is CommonSuccessState<List<Todo>>) {
-                return Expanded(
-                  child: Container(
-                    margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                    child: Scrollbar(
-                      thumbVisibility: true,
-                      thickness: 10,
-                      interactive: true,
-                      trackVisibility: true,
-                      child: SingleChildScrollView(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ...List<Widget>.generate(
-                            state.item.length,
-                            (index) {
-                              return Container(
-                                margin: EdgeInsets.only(bottom: 12),
-                                color: Colors.white,
-                                child: Slidable(
-                                  endActionPane: ActionPane(
-                                    dismissible: DismissiblePane(
-                                      onDismissed: () {},
-                                    ),
-                                    motion: DrawerMotion(),
-                                    children: [
-                                      SlidableAction(
-                                        icon: Icons.edit,
-                                        onPressed: (context) {},
-                                      ),
-                                      SlidableAction(
-                                        icon: Icons.delete_forever,
-                                        onPressed: (context) {},
-                                      ),
-                                    ],
-                                  ),
-                                  child: ListTile(
-                                    title: Text(
-                                      "Task ${state.item[index].title}",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    contentPadding: EdgeInsets.only(left: 5),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      )),
-                    ),
-                  ),
-                );
+      //moved appBar to seperate file for clean code
+      appBar: CustomAppBar(),
+
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<CreateTodoCubit, CommonState>(
+            listener: (context, state) {
+              if (state is CommonLoadingState) {
+                context.loaderOverlay.show();
               } else {
-                return Expanded(
-                  child: Center(
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                );
+                context.loaderOverlay.hide();
+              }
+
+              if (state is CommonSuccessState) {
+                context.read<FetchTodosCubit>().refreshTodos();
               }
             },
-          )
+          ),
+          BlocListener<DeleteTodoCubit, CommonState>(
+            listener: (context, state) {
+              if (state is CommonLoadingState) {
+                context.loaderOverlay.show();
+              } else {
+                context.loaderOverlay.hide();
+              }
+
+              if (state is CommonSuccessState) {
+                context.read<FetchTodosCubit>().refreshTodos();
+              }
+            },
+          ),
+          BlocListener<UpdateTodoCubit, CommonState>(
+            listener: (context, state) {
+              if (state is CommonLoadingState) {
+                context.loaderOverlay.show();
+              } else {
+                context.loaderOverlay.hide();
+              }
+
+              if (state is CommonSuccessState) {
+                context.read<FetchTodosCubit>().refreshTodos();
+              }
+            },
+          ),
+          BlocListener<FetchTodosCubit, CommonState>(
+            listener: (context, state) {
+              if (state is CommonLoadingState) {
+                context.loaderOverlay.show();
+              } else {
+                context.loaderOverlay.hide();
+              }
+            },
+          ),
         ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            UpperSection(),
+            Container(
+              color: Colors.white,
+              padding: EdgeInsets.all(5),
+              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+              child: Text(
+                "Today's Tasks",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            BlocBuilder<FetchTodosCubit, CommonState>(
+              builder: (context, state) {
+                if (state is CommonSuccessState<List<Todo>>) {
+                  return Expanded(
+                    child: Container(
+                      margin:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        thickness: 10,
+                        interactive: true,
+                        trackVisibility: true,
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ...List<Widget>.generate(
+                                state.item.length,
+                                (index) {
+                                  return Container(
+                                    margin: EdgeInsets.only(bottom: 12),
+                                    color: Colors.white,
+                                    child: Slidable(
+                                      startActionPane: ActionPane(
+                                        // dismissible: DismissiblePane(
+                                        //   onDismissed: () {},
+                                        // ),
+                                        motion: DrawerMotion(),
+                                        children: [
+                                          SlidableAction(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.blueAccent,
+                                            icon: Icons.edit,
+                                            onPressed: (context) {
+                                              _updateTodoHandler(
+                                                  todo: state.item,
+                                                  index: index);
+                                            },
+                                          ),
+                                          SlidableAction(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.redAccent,
+                                            icon: Icons.delete_forever,
+                                            onPressed: (context) {
+                                              context
+                                                  .read<DeleteTodoCubit>()
+                                                  .deleteTodo(
+                                                    docId:
+                                                        state.item[index].docId,
+                                                  );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      child: ListTile(
+                                        title: Text(
+                                          "Task ${state.item[index].title}",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        contentPadding:
+                                            EdgeInsets.only(left: 5),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                } else {
+                  return Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    ),
+                  );
+                }
+              },
+            )
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.grey[300],
-        onPressed: () {
-          context.read<CreateTodoCubit>().createTodo(title: "hello testing");
+        onPressed: () async {
+          todoText = await showDialog(
+            context: context,
+            builder: (context) {
+              return CustomDialog(
+                taskAtHand: "Create a new",
+              );
+            },
+          );
+          if (todoText != null) {
+            context.read<CreateTodoCubit>().createTodo(title: todoText);
+          }
         },
         child: Icon(Icons.add),
       ),

@@ -18,7 +18,7 @@ class DashboardRepository {
       _todos.clear();
       final _todosList = _todosDocumentSnapshotList.map(
         (e) {
-          return Todo.fromJson(e.data());
+          return Todo.fromJson(json: e.data(), docId: e.id);
         },
       );
       for (final item in _todosList) {
@@ -33,7 +33,7 @@ class DashboardRepository {
 
   Future<Either<String, List<Todo>>> createTodo({String? title}) async {
     try {
-      final todosReference = FirebaseFirestore.instance
+      final todosReference = await FirebaseFirestore.instance
           .collection("Users")
           .doc("user1")
           .collection("todos");
@@ -41,8 +41,13 @@ class DashboardRepository {
         "title": title,
         "createdAt": Timestamp.now(),
       });
+      await newTodoReference.set(
+        {"docId": newTodoReference.id},
+        SetOptions(merge: true),
+      );
       final _todoSnapshot = await newTodoReference.get();
-      final _todo = Todo.fromJson(_todoSnapshot.data()!);
+      final _todo = Todo.fromJson(
+          json: _todoSnapshot.data()!, docId: newTodoReference.id);
       _todos.add(_todo);
 
       return Right(_todos);
@@ -52,7 +57,7 @@ class DashboardRepository {
   }
 
   Future<Either<String, List<Todo>>> updateTodo(
-      {String? docId, String? title}) async {
+      {required String? docId, required String? title}) async {
     try {
       final todosReference = FirebaseFirestore.instance
           .collection("Users")
@@ -63,9 +68,12 @@ class DashboardRepository {
 
       final documentSnapshot = await documentReference.get();
 
-      final String? initialTitle = documentSnapshot.data()!["title"];
+      final initialTitle = documentSnapshot.data()!["title"];
 
-      documentReference.update({"title": title});
+      await documentReference.set(
+        {"title": title},
+        SetOptions(merge: true),
+      );
 
       final index = _todos.indexWhere(
         (e) => e.title == initialTitle,
@@ -80,13 +88,14 @@ class DashboardRepository {
     }
   }
 
-  Future<Either<String, List<Todo>>> deleteTodo({String? docId}) async {
+  Future<Either<String, List<Todo>>> deleteTodo(
+      {required String? docId}) async {
     try {
       final todosReference = FirebaseFirestore.instance
           .collection("Users")
           .doc("user1")
           .collection("todos");
-      final docRef = todosReference.doc("docId");
+      final docRef = todosReference.doc(docId);
       final docSnapshot = await docRef.get();
       final title = docSnapshot.data()!["title"];
 
@@ -99,6 +108,14 @@ class DashboardRepository {
         _todos.removeAt(index);
       }
 
+      return Right(_todos);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, List<Todo>>> refresh() async {
+    try {
       return Right(_todos);
     } catch (e) {
       return Left(e.toString());

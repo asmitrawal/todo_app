@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
+import 'package:todo_app/dashboard/cubit/delete_todo_cubit.dart';
 import 'package:todo_app/dashboard/cubit/fetch_todos_cubit.dart';
+import 'package:todo_app/dashboard/cubit/update_todo_cubit.dart';
 import 'package:todo_app/dashboard/repository/dashboard_repository.dart';
 import 'package:todo_app/dashboard/ui/dashboard_widget.dart';
 
@@ -14,11 +16,20 @@ class DashboardScreen extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) =>
-              FetchTodosCubit(repository: context.read<DashboardRepository>()),
+              UpdateTodoCubit(repository: context.read<DashboardRepository>()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              FetchTodosCubit(repository: context.read<DashboardRepository>())
+                ..fetchTodos(),
         ),
         BlocProvider(
           create: (context) =>
               CreateTodoCubit(repository: context.read<DashboardRepository>()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              DeleteTodoCubit(repository: context.read<DashboardRepository>()),
         ),
       ],
       child: DashboardWidget(),

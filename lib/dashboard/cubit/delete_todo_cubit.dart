@@ -3,28 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:todo_app/common/common_state.dart';
 import 'package:todo_app/dashboard/repository/dashboard_repository.dart';
 
-class FetchTodosCubit extends Cubit<CommonState> {
-  DashboardRepository repository;
-  FetchTodosCubit({
+class DeleteTodoCubit extends Cubit<CommonState> {
+  final DashboardRepository repository;
+  DeleteTodoCubit({
     required this.repository,
   }) : super(CommonInitialState());
 
-  fetchTodos() async {
+  deleteTodo({required String? docId}) async {
     emit(CommonLoadingState());
-    final res = await repository.fetchTodos();
-    res.fold(
-      (err) {
-        emit(CommonErrorState(message: err));
-      },
-      (data) {
-        emit(CommonSuccessState(item: data));
-      },
-    );
-  }
 
-  refreshTodos() async {
-    emit(CommonLoadingState());
-    final res = await repository.refresh();
+    final res = await repository.deleteTodo(
+      docId: docId,
+    );
     res.fold(
       (err) {
         emit(CommonErrorState(message: err));

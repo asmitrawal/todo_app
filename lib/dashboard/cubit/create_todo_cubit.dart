@@ -9,7 +9,7 @@ class CreateTodoCubit extends Cubit<CommonState> {
     required this.repository,
   }) : super(CommonInitialState());
 
-  createTodo({String? title}) async {
+  createTodo({required String? title}) async {
     emit(CommonLoadingState());
     final res = await repository.createTodo(title: title);
     res.fold(
