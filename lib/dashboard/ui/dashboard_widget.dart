@@ -5,7 +5,7 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:todo_app/common/common_state.dart';
-import 'package:todo_app/common/custom_dialog.dart';
+import 'package:todo_app/common/widgets/custom_dialog.dart';
 import 'package:todo_app/dashboard/cubit/checkbox_cubit.dart';
 import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
 import 'package:todo_app/dashboard/cubit/delete_todo_cubit.dart';
@@ -179,7 +179,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        // color: Colors.white,
                         borderRadius: BorderRadius.circular(5),
                       ),
                       padding: EdgeInsets.all(5),
@@ -213,9 +213,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                   state.item!.length,
                                   (index) {
                                     return Container(
-                                      margin: EdgeInsets.only(bottom: 15),
+                                      margin: EdgeInsets.only(bottom: 18),
                                       decoration: BoxDecoration(
-                                        color: Colors.white,
+                                        // color: Colors.white,
                                         borderRadius: BorderRadius.circular(5),
                                       ),
                                       child: Slidable(

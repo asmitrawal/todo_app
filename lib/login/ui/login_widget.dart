@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:todo_app/common/common_state.dart';
 import 'package:todo_app/dashboard/ui/dashboard_screen.dart';
 import 'package:todo_app/login/cubit/google_sign_in_cubit.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginWidget extends StatelessWidget {
   const LoginWidget({super.key});
@@ -36,17 +37,44 @@ class LoginWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                height: MediaQuery.of(context).size.width * 0.4,
-                width: MediaQuery.of(context).size.width * 0.4,
-                color: Colors.white,
-                // child: ,
+                // color: Colors.white,
+                child: Stack(
+                  children: [
+                    // Logo at the top
+                    Container(
+                      height: MediaQuery.of(context).size.width * 0.4,
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      child: FittedBox(
+                        child: Icon(
+                          FontAwesomeIcons.listCheck,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        fit: BoxFit.fitWidth,
+                      ),
+                    ),
+
+                    // Text at the bottom right
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Text(
+                        'Todos by Narco',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          // color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.08,
               ),
               Container(
                 padding: EdgeInsets.all(10),
-                color: Colors.white,
+                // color: Colors.white,
                 child: Text(
                   "Welcome to Todos",
                   style: TextStyle(fontSize: 34),
@@ -58,7 +86,7 @@ class LoginWidget extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(10),
                 height: 50,
-                color: Colors.white,
+                // color: Colors.white,
                 child: Text(
                   "Lets get you started",
                   style: TextStyle(fontSize: 14),
@@ -77,13 +105,13 @@ class LoginWidget extends StatelessWidget {
                     child: Container(
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                          color: Colors.blue[400],
+                          color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadiusDirectional.circular(15)),
                       child: Text(
                         "Login with Google",
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white,
+                          // color: Colors.white,
                         ),
                       ),
                     ),
@@ -91,7 +119,7 @@ class LoginWidget extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                        color: Colors.grey[400],
+                        color: Colors.grey[500],
                         borderRadius: BorderRadiusDirectional.circular(15)),
                     child: Text(
                       "Use Offline Mode",
@@ -107,7 +135,7 @@ class LoginWidget extends StatelessWidget {
                 padding: EdgeInsets.all(10),
                 // color: Colors.white,
                 child: Text(
-                  "Nah, I'll stick to procrastination for a while",
+                  "Nah, I'm going back to scrolling on tiktok",
                   style: TextStyle(
                       fontSize: 12, decoration: TextDecoration.underline),
                 ),

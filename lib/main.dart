@@ -1,5 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:todo_app/common/cubit/theme_mode_cubit.dart';
+import 'package:todo_app/common/my_theme_data.dart';
+import 'package:todo_app/common/my_theme_state.dart';
 import 'package:todo_app/dashboard/repository/dashboard_repository.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -29,21 +32,19 @@ class MyApp extends StatelessWidget {
           create: (context) => DashboardRepository(),
         ),
       ],
-      child: GlobalLoaderOverlay(
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            // colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-            useMaterial3: true,
-            scaffoldBackgroundColor: Colors.grey[300],
-            appBarTheme: AppBarTheme(backgroundColor: Colors.grey[300]),
-            fontFamily: GoogleFonts.rosarivo().fontFamily,
-            // textTheme: TextTheme(
-            //   bodyMedium: GoogleFonts.indieFlower(),
-            // )
-          ),
-          home: LoginScreen(),
-          debugShowCheckedModeBanner: false,
+      child: BlocProvider(
+        create: (context) => MyThemeCubit(),
+        child: BlocBuilder<MyThemeCubit, MyTheme>(
+          builder: (context, state) {
+            return GlobalLoaderOverlay(
+              child: MaterialApp(
+                title: 'Flutter Demo',
+                theme: state.themedata,
+                home: LoginScreen(),
+                debugShowCheckedModeBanner: false,
+              ),
+            );
+          },
         ),
       ),
     );

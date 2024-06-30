@@ -21,7 +21,7 @@ class UpperSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: Colors.white,
+            // color: Colors.white,
             borderRadius: BorderRadius.circular(5),
           ),
           margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
@@ -34,7 +34,7 @@ class UpperSection extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            // color: Colors.white,
             borderRadius: BorderRadius.circular(5),
           ),
           padding: EdgeInsets.all(5),
@@ -56,7 +56,7 @@ class UpperSection extends StatelessWidget {
                 child: Container(
                   height: 80,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    // color: Colors.white,
                     borderRadius: BorderRadius.circular(5),
                   ),
                   padding: EdgeInsets.all(5),
@@ -85,7 +85,7 @@ class UpperSection extends StatelessWidget {
                 fit: FlexFit.tight,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    // color: Colors.white,
                     borderRadius: BorderRadius.circular(5),
                   ),
                   padding: EdgeInsets.all(5),
