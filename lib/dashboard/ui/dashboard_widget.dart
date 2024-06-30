@@ -27,6 +27,10 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    //flag to prevent two loading indicators showing
+    bool _isInitialLoad = true;
+
+    //for creating and updating todo
     String? todoText;
 
     //update module is moved here because the onPressed cannot handle async function
@@ -40,7 +44,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         },
       );
       if (todoText != null) {
-        print(todoText);
         context
             .read<UpdateTodoCubit>()
             .updateTodo(docId: todo[index].docId, title: todoText);
@@ -102,105 +105,124 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             },
           ),
         ],
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            UpperSection(),
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.all(5),
-              margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-              child: Text(
-                "Today's Tasks",
-                style: TextStyle(
-                  fontSize: 14,
+        child: RefreshIndicator(
+          onRefresh: () async {
+            _isInitialLoad = false; // to get rid of builder loading indicator
+
+            await context.read<FetchTodosCubit>().fetchTodos();
+          },
+          child: ScrollConfiguration(
+            behavior: ScrollBehavior(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                UpperSection(),
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.all(5),
+                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  child: Text(
+                    "Today's Tasks",
+                    style: TextStyle(
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            BlocBuilder<FetchTodosCubit, CommonState>(
-              builder: (context, state) {
-                if (state is CommonSuccessState<List<Todo>>) {
-                  return Expanded(
-                    child: Container(
-                      margin:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-                      child: Scrollbar(
-                        thumbVisibility: true,
-                        thickness: 10,
-                        interactive: true,
-                        trackVisibility: true,
-                        child: SingleChildScrollView(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ...List<Widget>.generate(
-                                state.item.length,
-                                (index) {
-                                  return Container(
-                                    margin: EdgeInsets.only(bottom: 12),
-                                    color: Colors.white,
-                                    child: Slidable(
-                                      startActionPane: ActionPane(
-                                        // dismissible: DismissiblePane(
-                                        //   onDismissed: () {},
-                                        // ),
-                                        motion: DrawerMotion(),
-                                        children: [
-                                          SlidableAction(
-                                            foregroundColor: Colors.white,
-                                            backgroundColor: Colors.blueAccent,
-                                            icon: Icons.edit,
-                                            onPressed: (context) {
-                                              _updateTodoHandler(
-                                                  todo: state.item,
-                                                  index: index);
-                                            },
+                BlocBuilder<FetchTodosCubit, CommonState>(
+                  builder: (context, state) {
+                    if (state is CommonSuccessState<List<Todo>>) {
+                      return Expanded(
+                        child: Container(
+                          margin: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 10),
+                          child: Scrollbar(
+                            //scroll bar for thumb visibility, track visibilty
+                            thumbVisibility: true,
+                            thickness: 5,
+                            interactive: true,
+                            trackVisibility: true,
+                            child: SingleChildScrollView(
+                              physics: BouncingScrollPhysics().applyTo(AlwaysScrollableScrollPhysics()),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  ...List<Widget>.generate(
+                                    state.item.length,
+                                    (index) {
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 12),
+                                        color: Colors.white,
+                                        child: Slidable(
+                                          endActionPane: ActionPane(
+                                            // dismissible: DismissiblePane(
+                                            //   onDismissed: () {},
+                                            // ),
+                                            motion: DrawerMotion(),
+                                            children: [
+                                              SlidableAction(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor:
+                                                    Colors.blueAccent,
+                                                icon: Icons.edit,
+                                                onPressed: (context) {
+                                                  _updateTodoHandler(
+                                                      todo: state.item,
+                                                      index: index);
+                                                },
+                                              ),
+                                              SlidableAction(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor:
+                                                    Colors.redAccent,
+                                                icon: Icons.delete_forever,
+                                                onPressed: (context) {
+                                                  context
+                                                      .read<DeleteTodoCubit>()
+                                                      .deleteTodo(
+                                                        docId: state
+                                                            .item[index].docId,
+                                                      );
+                                                },
+                                              ),
+                                            ],
                                           ),
-                                          SlidableAction(
-                                            foregroundColor: Colors.white,
-                                            backgroundColor: Colors.redAccent,
-                                            icon: Icons.delete_forever,
-                                            onPressed: (context) {
-                                              context
-                                                  .read<DeleteTodoCubit>()
-                                                  .deleteTodo(
-                                                    docId:
-                                                        state.item[index].docId,
-                                                  );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                      child: ListTile(
-                                        title: Text(
-                                          "Task ${state.item[index].title}",
-                                          style: TextStyle(
-                                            fontSize: 14,
+                                          child: ListTile(
+                                            title: Text(
+                                              "Task ${state.item[index].title}",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            contentPadding:
+                                                EdgeInsets.only(left: 5),
                                           ),
                                         ),
-                                        contentPadding:
-                                            EdgeInsets.only(left: 5),
-                                      ),
-                                    ),
-                                  );
-                                },
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                  );
-                } else {
-                  return Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator.adaptive(),
-                    ),
-                  );
-                }
-              },
-            )
-          ],
+                      );
+                    } else {
+                      if (_isInitialLoad) {
+                        return Expanded(
+                          child: Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          ),
+                        );
+                      } else {
+                        //this case will NEVER be reached, so chilling
+                        return Center();
+                      }
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

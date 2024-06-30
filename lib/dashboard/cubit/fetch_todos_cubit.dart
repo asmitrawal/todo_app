@@ -24,7 +24,7 @@ class FetchTodosCubit extends Cubit<CommonState> {
 
   refreshTodos() async {
     emit(CommonLoadingState());
-    final res = await repository.refresh();
+    final res = await repository.refresh(); 
     res.fold(
       (err) {
         emit(CommonErrorState(message: err));
