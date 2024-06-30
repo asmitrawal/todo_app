@@ -7,7 +7,7 @@ class CommonErrorState extends CommonState {
 }
 
 class CommonSuccessState<T> extends CommonState {
-  final T item;
+  final T? item;
 
   CommonSuccessState({required this.item});
 }

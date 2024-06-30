@@ -9,9 +9,9 @@ class FetchTodosCubit extends Cubit<CommonState> {
     required this.repository,
   }) : super(CommonInitialState());
 
-  fetchTodos() async {
+  fetchTodos({required String userId}) async {
     emit(CommonLoadingState());
-    final res = await repository.fetchTodos();
+    final res = await repository.fetchTodos(userId: userId);
     res.fold(
       (err) {
         emit(CommonErrorState(message: err));
@@ -24,7 +24,7 @@ class FetchTodosCubit extends Cubit<CommonState> {
 
   refreshTodos() async {
     emit(CommonLoadingState());
-    final res = await repository.refresh(); 
+    final res = await repository.refresh();
     res.fold(
       (err) {
         emit(CommonErrorState(message: err));

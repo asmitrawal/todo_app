@@ -10,8 +10,9 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          GoogleSignInCubit(repository: context.read<LoginRepository>()),
+      create: (context) => GoogleSignInCubit(
+        repository: context.read<LoginRepository>(),
+      ),
       child: LoginWidget(),
     );
   }

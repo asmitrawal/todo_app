@@ -7,11 +7,17 @@ class DashboardRepository {
 
   List<Todo> get todos => _todos;
 
-  Future<Either<String, List<Todo>>> fetchTodos() async {
+  // userInfo, userData
+  // userInfo: {userId, userName, userProfile}
+  // userData: userId -> todos -> todoId -> {data here}
+
+  Future<Either<String, List<Todo>>> fetchTodos({
+    required String? userId,
+  }) async {
     try {
       final todosReference = await FirebaseFirestore.instance
-          .collection("Users")
-          .doc("user1")
+          .collection("users")
+          .doc(userId)
           .collection("todos");
       final _todosQuerySnapshot = await todosReference.get();
       final _todosDocumentSnapshotList = _todosQuerySnapshot.docs;
@@ -31,11 +37,14 @@ class DashboardRepository {
     }
   }
 
-  Future<Either<String, List<Todo>>> createTodo({String? title}) async {
+  Future<Either<String, List<Todo>>> createTodo({
+    String? title,
+    required String? userId,
+  }) async {
     try {
       final todosReference = await FirebaseFirestore.instance
-          .collection("Users")
-          .doc("user1")
+          .collection("users")
+          .doc(userId)
           .collection("todos");
       final newTodoReference = await todosReference.add({
         "title": title,
@@ -56,12 +65,15 @@ class DashboardRepository {
     }
   }
 
-  Future<Either<String, List<Todo>>> updateTodo(
-      {required String? docId, required String? title}) async {
+  Future<Either<String, List<Todo>>> updateTodo({
+    required String? docId,
+    required String? title,
+    required String? userId,
+  }) async {
     try {
       final todosReference = FirebaseFirestore.instance
-          .collection("Users")
-          .doc("user1")
+          .collection("users")
+          .doc(userId)
           .collection("todos");
 
       final documentReference = todosReference.doc(docId);
@@ -88,12 +100,14 @@ class DashboardRepository {
     }
   }
 
-  Future<Either<String, List<Todo>>> deleteTodo(
-      {required String? docId}) async {
+  Future<Either<String, List<Todo>>> deleteTodo({
+    required String? docId,
+    required String? userId,
+  }) async {
     try {
       final todosReference = FirebaseFirestore.instance
-          .collection("Users")
-          .doc("user1")
+          .collection("users")
+          .doc(userId)
           .collection("todos");
       final docRef = todosReference.doc(docId);
       final docSnapshot = await docRef.get();

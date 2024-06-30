@@ -5,15 +5,20 @@ import 'package:todo_app/dashboard/repository/dashboard_repository.dart';
 
 class DeleteTodoCubit extends Cubit<CommonState> {
   final DashboardRepository repository;
+
   DeleteTodoCubit({
     required this.repository,
   }) : super(CommonInitialState());
 
-  deleteTodo({required String? docId}) async {
+  deleteTodo({
+    required String? docId,
+    required String? userId,
+  }) async {
     emit(CommonLoadingState());
 
     final res = await repository.deleteTodo(
       docId: docId,
+      userId: userId,
     );
     res.fold(
       (err) {

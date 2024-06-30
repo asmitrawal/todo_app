@@ -1,7 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:todo_app/common/common_state.dart';
 import 'package:todo_app/common/custom_dialog.dart';
 import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
@@ -11,6 +13,9 @@ import 'package:todo_app/dashboard/cubit/update_todo_cubit.dart';
 import 'package:todo_app/dashboard/model/todo.dart';
 import 'package:todo_app/dashboard/ui/custom_app_bar.dart';
 import 'package:todo_app/dashboard/ui/upper_section.dart';
+import 'package:todo_app/login/cubit/sign_out_cubit.dart';
+import 'package:todo_app/login/repository/login_repository.dart';
+import 'package:todo_app/login/ui/login_screen.dart';
 
 class DashboardWidget extends StatefulWidget {
   const DashboardWidget({super.key});
@@ -27,6 +32,9 @@ class _DashboardWidgetState extends State<DashboardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    //fetch current user to perfrom personalised CRUD
+    User? user = FirebaseAuth.instance.currentUser;
+
     //flag to prevent two loading indicators showing
     bool _isInitialLoad = true;
 
@@ -44,75 +52,91 @@ class _DashboardWidgetState extends State<DashboardWidget> {
         },
       );
       if (todoText != null) {
-        context
-            .read<UpdateTodoCubit>()
-            .updateTodo(docId: todo[index].docId, title: todoText);
+        context.read<UpdateTodoCubit>().updateTodo(
+              docId: todo[index].docId,
+              title: todoText,
+              userId: user!.displayName!.split(" ").join("_").toLowerCase(),
+            );
       }
     }
 
-    return Scaffold(
-      //moved appBar to seperate file for clean code
-      appBar: CustomAppBar(),
+    return BlocListener<SignOutCubit, CommonState>(
+  
+      listener: (context, state) {
+        if (state is CommonSuccessState) {
+          Navigator.of(context).push(
+            PageTransition(
+              child: LoginScreen(),
+              type: PageTransitionType.rightToLeft,
+              duration: Duration(milliseconds: 300),
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        //moved appBar to seperate file for clean code
+        appBar: CustomAppBar(),
 
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<CreateTodoCubit, CommonState>(
-            listener: (context, state) {
-              if (state is CommonLoadingState) {
-                context.loaderOverlay.show();
-              } else {
-                context.loaderOverlay.hide();
-              }
+        body: MultiBlocListener(
+          listeners: [
+            BlocListener<CreateTodoCubit, CommonState>(
+              listener: (context, state) {
+                if (state is CommonLoadingState) {
+                  context.loaderOverlay.show();
+                } else {
+                  context.loaderOverlay.hide();
+                }
 
-              if (state is CommonSuccessState) {
-                context.read<FetchTodosCubit>().refreshTodos();
-              }
+                if (state is CommonSuccessState) {
+                  context.read<FetchTodosCubit>().refreshTodos();
+                }
+              },
+            ),
+            BlocListener<DeleteTodoCubit, CommonState>(
+              listener: (context, state) {
+                if (state is CommonLoadingState) {
+                  context.loaderOverlay.show();
+                } else {
+                  context.loaderOverlay.hide();
+                }
+
+                if (state is CommonSuccessState) {
+                  context.read<FetchTodosCubit>().refreshTodos();
+                }
+              },
+            ),
+            BlocListener<UpdateTodoCubit, CommonState>(
+              listener: (context, state) {
+                if (state is CommonLoadingState) {
+                  context.loaderOverlay.show();
+                } else {
+                  context.loaderOverlay.hide();
+                }
+
+                if (state is CommonSuccessState) {
+                  context.read<FetchTodosCubit>().refreshTodos();
+                }
+              },
+            ),
+            BlocListener<FetchTodosCubit, CommonState>(
+              listener: (context, state) {
+                if (state is CommonLoadingState) {
+                  context.loaderOverlay.show();
+                } else {
+                  context.loaderOverlay.hide();
+                }
+              },
+            ),
+          ],
+          child: RefreshIndicator(
+            onRefresh: () async {
+              _isInitialLoad = false; // to get rid of builder loading indicator
+
+              await context.read<FetchTodosCubit>().fetchTodos(
+                    userId:
+                        user!.displayName!.split(" ").join("_").toLowerCase(),
+                  );
             },
-          ),
-          BlocListener<DeleteTodoCubit, CommonState>(
-            listener: (context, state) {
-              if (state is CommonLoadingState) {
-                context.loaderOverlay.show();
-              } else {
-                context.loaderOverlay.hide();
-              }
-
-              if (state is CommonSuccessState) {
-                context.read<FetchTodosCubit>().refreshTodos();
-              }
-            },
-          ),
-          BlocListener<UpdateTodoCubit, CommonState>(
-            listener: (context, state) {
-              if (state is CommonLoadingState) {
-                context.loaderOverlay.show();
-              } else {
-                context.loaderOverlay.hide();
-              }
-
-              if (state is CommonSuccessState) {
-                context.read<FetchTodosCubit>().refreshTodos();
-              }
-            },
-          ),
-          BlocListener<FetchTodosCubit, CommonState>(
-            listener: (context, state) {
-              if (state is CommonLoadingState) {
-                context.loaderOverlay.show();
-              } else {
-                context.loaderOverlay.hide();
-              }
-            },
-          ),
-        ],
-        child: RefreshIndicator(
-          onRefresh: () async {
-            _isInitialLoad = false; // to get rid of builder loading indicator
-
-            await context.read<FetchTodosCubit>().fetchTodos();
-          },
-          child: ScrollConfiguration(
-            behavior: ScrollBehavior(),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -142,12 +166,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                             interactive: true,
                             trackVisibility: true,
                             child: SingleChildScrollView(
-                              physics: BouncingScrollPhysics().applyTo(AlwaysScrollableScrollPhysics()),
+                              physics: BouncingScrollPhysics()
+                                  .applyTo(AlwaysScrollableScrollPhysics()),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   ...List<Widget>.generate(
-                                    state.item.length,
+                                    state.item!.length,
                                     (index) {
                                       return Container(
                                         margin: EdgeInsets.only(bottom: 12),
@@ -166,7 +191,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                 icon: Icons.edit,
                                                 onPressed: (context) {
                                                   _updateTodoHandler(
-                                                      todo: state.item,
+                                                      todo: state.item!,
                                                       index: index);
                                                 },
                                               ),
@@ -180,7 +205,12 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                                       .read<DeleteTodoCubit>()
                                                       .deleteTodo(
                                                         docId: state
-                                                            .item[index].docId,
+                                                            .item![index].docId,
+                                                        userId: user!
+                                                            .displayName!
+                                                            .split(" ")
+                                                            .join("_")
+                                                            .toLowerCase(),
                                                       );
                                                 },
                                               ),
@@ -188,7 +218,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                           ),
                                           child: ListTile(
                                             title: Text(
-                                              "Task ${state.item[index].title}",
+                                              "Task ${state.item![index].title}",
                                               style: TextStyle(
                                                 fontSize: 14,
                                               ),
@@ -224,23 +254,27 @@ class _DashboardWidgetState extends State<DashboardWidget> {
             ),
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.grey[300],
-        onPressed: () async {
-          todoText = await showDialog(
-            context: context,
-            builder: (context) {
-              return CustomDialog(
-                taskAtHand: "Create a new",
-              );
-            },
-          );
-          if (todoText != null) {
-            context.read<CreateTodoCubit>().createTodo(title: todoText);
-          }
-        },
-        child: Icon(Icons.add),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Colors.grey[300],
+          onPressed: () async {
+            todoText = await showDialog(
+              context: context,
+              builder: (context) {
+                return CustomDialog(
+                  taskAtHand: "Create a new",
+                );
+              },
+            );
+            if (todoText != null) {
+              context.read<CreateTodoCubit>().createTodo(
+                    title: todoText,
+                    userId:
+                        user!.displayName!.split(" ").join("_").toLowerCase(),
+                  );
+            }
+          },
+          child: Icon(Icons.add),
+        ),
       ),
     );
   }

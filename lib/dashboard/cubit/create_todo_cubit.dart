@@ -5,13 +5,20 @@ import 'package:todo_app/dashboard/repository/dashboard_repository.dart';
 
 class CreateTodoCubit extends Cubit<CommonState> {
   DashboardRepository repository;
+
   CreateTodoCubit({
     required this.repository,
   }) : super(CommonInitialState());
 
-  createTodo({required String? title}) async {
+  createTodo({
+    required String? title,
+    required String? userId,
+  }) async {
     emit(CommonLoadingState());
-    final res = await repository.createTodo(title: title);
+    final res = await repository.createTodo(
+      title: title,
+      userId: userId,
+    );
     res.fold(
       (err) {
         emit(CommonErrorState(message: err));

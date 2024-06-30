@@ -9,12 +9,17 @@ class UpdateTodoCubit extends Cubit<CommonState> {
     required this.repository,
   }) : super(CommonInitialState());
 
-  updateTodo({required String? docId, required String? title}) async {
+  updateTodo({
+    required String? docId,
+    required String? title,
+    required String? userId,
+  }) async {
     emit(CommonLoadingState());
 
     final res = await repository.updateTodo(
       docId: docId,
       title: title,
+      userId: userId,
     );
     res.fold(
       (err) {

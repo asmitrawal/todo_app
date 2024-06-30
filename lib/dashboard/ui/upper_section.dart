@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UpperSection extends StatelessWidget {
@@ -5,6 +6,7 @@ class UpperSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -14,7 +16,7 @@ class UpperSection extends StatelessWidget {
           padding: EdgeInsets.all(5),
           margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           child: Text(
-            "What's up, Aayush!",
+            "What's up, ${user!.displayName!.split(" ")[0]}!",
             style: TextStyle(
               fontSize: 20,
             ),
