@@ -7,10 +7,6 @@ class DashboardRepository {
 
   List<Todo> get todos => _todos;
 
-  // userInfo, userData
-  // userInfo: {userId, userName, userProfile}
-  // userData: userId -> todos -> todoId -> {data here}
-
   Future<Either<String, List<Todo>>> fetchTodos({
     required String? userId,
   }) async {
@@ -19,7 +15,12 @@ class DashboardRepository {
           .collection("users")
           .doc(userId)
           .collection("todos");
-      final _todosQuerySnapshot = await todosReference.get();
+      final _todosQuerySnapshot = await todosReference
+          .orderBy(
+            "createdAt",
+            descending: false,
+          )
+          .get();
       final _todosDocumentSnapshotList = _todosQuerySnapshot.docs;
       _todos.clear();
       final _todosList = _todosDocumentSnapshotList.map(
@@ -29,7 +30,6 @@ class DashboardRepository {
       );
       for (final item in _todosList) {
         _todos.add(item);
-        // print(item.data());
       }
       return Right(_todos);
     } catch (e) {
@@ -49,6 +49,7 @@ class DashboardRepository {
       final newTodoReference = await todosReference.add({
         "title": title,
         "createdAt": Timestamp.now(),
+        "completed": false,
       });
       await newTodoReference.set(
         {"docId": newTodoReference.id},
@@ -130,6 +131,34 @@ class DashboardRepository {
 
   Future<Either<String, List<Todo>>> refresh() async {
     try {
+      return Right(_todos);
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  Future<Either<String, List<Todo>>> toggleCheckbox({
+    required bool isChecked,
+    required String? userId,
+    required String? docId,
+  }) async {
+    try {
+      final todosReference = FirebaseFirestore.instance
+          .collection("users")
+          .doc(userId)
+          .collection("todos");
+      await todosReference.doc(docId).set(
+        {"completed": isChecked},
+        SetOptions(merge: true),
+      );
+      final docSnapshot = await todosReference.doc(docId).get();
+      final index = _todos.indexWhere(
+        (e) => e.title == docSnapshot.data()!["title"],
+      );
+      if (index != -1) {
+        _todos[index].completed = isChecked;
+      }
+
       return Right(_todos);
     } catch (e) {
       return Left(e.toString());

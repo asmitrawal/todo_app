@@ -1,8 +1,15 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UpperSection extends StatelessWidget {
-  const UpperSection({super.key});
+  final int completedTasks;
+  final int dueTasks;
+  UpperSection({
+    Key? key,
+    required this.completedTasks,
+    required this.dueTasks,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,9 +19,12 @@ class UpperSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          color: Colors.white,
           padding: EdgeInsets.all(5),
-          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
           child: Text(
             "What's up, ${user!.displayName!.split(" ")[0]}!",
             style: TextStyle(
@@ -23,9 +33,12 @@ class UpperSection extends StatelessWidget {
           ),
         ),
         Container(
-          color: Colors.white,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(5),
+          ),
           padding: EdgeInsets.all(5),
-          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+          margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
           child: Text(
             "CATEGORIES",
             style: TextStyle(
@@ -42,14 +55,17 @@ class UpperSection extends StatelessWidget {
                 flex: 4,
                 child: Container(
                   height: 80,
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                   padding: EdgeInsets.all(5),
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "40 tasks",
+                        "${dueTasks} tasks",
                         style: TextStyle(
                           fontSize: 12,
                         ),
@@ -68,14 +84,17 @@ class UpperSection extends StatelessWidget {
                 flex: 6,
                 fit: FlexFit.tight,
                 child: Container(
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5),
+                  ),
                   padding: EdgeInsets.all(5),
-                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                  margin: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "18 tasks",
+                        "${completedTasks} tasks",
                         style: TextStyle(
                           fontSize: 12,
                         ),

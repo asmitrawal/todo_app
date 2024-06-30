@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:todo_app/dashboard/cubit/checkbox_cubit.dart';
 import 'package:todo_app/dashboard/cubit/create_todo_cubit.dart';
 import 'package:todo_app/dashboard/cubit/delete_todo_cubit.dart';
 import 'package:todo_app/dashboard/cubit/fetch_todos_cubit.dart';
@@ -40,6 +41,10 @@ class DashboardScreen extends StatelessWidget {
         BlocProvider(
           create: (context) =>
               SignOutCubit(repository: context.read<LoginRepository>()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              CheckboxCubit(repository: context.read<DashboardRepository>()),
         ),
       ],
       child: DashboardWidget(),
